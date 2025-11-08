@@ -17,7 +17,15 @@ if [ ! -f "$BASEDIR/.env" ]; then
     echo "POSTGRES_PASSWORD=$DB_PWD"
     echo "POSTGRES_DB=podfetch"
   } > "$BASEDIR/.env"
+else
+  . "$BASEDIR/.env"
+  export DB_PWD=$POSTGRES_PASSWORD
+
 fi
+
+echo "DB Password: $DB_PWD"
+
+[ -z "$DB_PWD" ] && die "No DB Password"
 
 echo "Create Volumes"
 mkdir -p /data/db/podfetch
