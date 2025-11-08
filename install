@@ -24,7 +24,7 @@ docker volume create \
 docker volume create \
   --opt type=none \
   --opt o=bind \
-  --opt device=/data/db \
+  --opt device=/data/podcasts \
   podfetch-podcasts
 
 sudo docker compose pull && sudo docker compose up -d --remove-orphans
