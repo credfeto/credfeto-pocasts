@@ -20,7 +20,7 @@ services:
     environment:
       - POLLING_INTERVAL=60
       - SERVER_URL=http://localhost:80
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
       - db
 
