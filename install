@@ -28,13 +28,41 @@ docker volume create \
   --opt type=none \
   --opt o=bind \
   --opt device=/data/db/podfetch \
-  podfetch-db
+  podfetch_db
 
 docker volume create \
   --opt type=none \
   --opt o=bind \
   --opt device=/data/podcasts \
-  podfetch-podcasts
+  podfetch_podcasts
+
+
+echo "Start DB"
+docker container stop db
+docker container rm db -f
+docker container run --rm --name db \
+            -v podfetch_db:/var/lib/postgresql/data \
+            -e "POSTGRES_PASSWORD=$DB_PWD" \
+            -d postgres:14-alpine
+
+READY=1
+while [ $READY != 0 ]
+do
+  echo "Waiting for DB"...
+  sleep 5
+  docker exec -it db pg_isready -U postgres
+  READY=$?
+done
+
+#docker exec -it db pg_isready -U postgres
+#echo "Ready: $?"
+
+echo "Start Create DB User"
+docker exec -it db psql -U postgres -c "CREATE USER podfetch WITH PASSWORD '$DB_PWD' CREATEDB;"
+
+echo "Stop DB"
+docker container stop db
+docker container rm db -f
 
 sudo docker compose pull && sudo docker compose up -d --remove-orphans
 

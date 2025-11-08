@@ -15,8 +15,7 @@ services:
     ports:
       - "80:80/tcp"
     volumes:
-      - podfetch-podcasts:/app/podcasts
-      - podfetch-db:/app/db
+      - podfetch_podcasts:/app/podcasts
     environment:
       - POLLING_INTERVAL=60
       - SERVER_URL=http://localhost:80
@@ -34,13 +33,13 @@ services:
       PGDATA: /data/postgres
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - podfetch-db:/data/postgres
+      - podfetch_db:/data/postgres
     restart: unless-stopped
 
 volumes:
-  podfetch-podcasts:
-    name: podfetch-podcasts
+  podfetch_podcasts:
+    name: podfetch_podcasts
     external: true
-  podfetch-db:
-    name: podfetch-db
+  podfetch_db:
+    name: podfetch_db
     external: true
