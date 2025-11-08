@@ -66,6 +66,8 @@ done
 
 echo "Start Create DB User"
 docker exec -it db psql -U postgres -c "CREATE USER podfetch WITH PASSWORD '$DB_PWD' CREATEDB;"
+docker exec -it db psql -U postgres -c "CREATE DATABASE podfetch;"
+docker exec -it db psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE podfetch TO podfetch;"
 
 echo "Stop DB"
 docker container stop db
