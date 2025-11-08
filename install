@@ -10,7 +10,7 @@ die() {
 BASEDIR="$(dirname "$(readlink -f "$0")")"
 echo "Script Dir: $BASEDIR"
 
-
+rm -f "$BASEDIR/.env"
 if [ ! -f "$BASEDIR/.env" ]; then
   DB_PWD=$(cat /dev/urandom | tr -dc "a-zA-Z0-9" | fold -w 50 | head -n 1)
   {
