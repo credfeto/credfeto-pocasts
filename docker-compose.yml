@@ -45,6 +45,12 @@ services:
     environment:
       - MINIDLNA_MEDIA_DIR=/media \
       - MINIDLNA_FRIENDLY_NAME=Podcasts
+      - FORCE_SCAN=true
+      - FORCE_REBUILD=true
+      - PUID=1
+      - PGID=1
+      - MINIDLNA_INOTIFY:yes
+      - DEBUG:true
     ports:
       - "1900:1900/udp"
       - "8200:8200/tcp"
