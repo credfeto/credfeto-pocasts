@@ -15,7 +15,7 @@ if [ ! -f "$BASEDIR/.env" ]; then
   DB_PWD=$(cat /dev/urandom | tr -dc "a-zA-Z0-9" | fold -w 50 | head -n 1)
   {
     echo "POSTGRES_USER=podfetch"
-    echo "POSTGRES_USER=$DB_PWD"
+    echo "POSTGRES_PASSWORD=$DB_PWD"
     echo "POSTGRES_DB=podfetch"
   } > "$BASEDIR/.env"
 fi
