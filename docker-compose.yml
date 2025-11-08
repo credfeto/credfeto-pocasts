@@ -31,11 +31,10 @@ services:
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', 'postgres']
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - podfetch_db:/var/lib/postgresql/data
-    restart: unless-stopped
+    restart: always
 
 volumes:
   podfetch_podcasts:
