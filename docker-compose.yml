@@ -1,0 +1,31 @@
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 3600
+
+  podfetch:
+    image: samuel19982/podfetch:latest
+    container_name: podfetch
+    user: ${UID:-1000}:${GID:-1000}
+    ports:
+      - "80:8000"
+    volumes:
+      - podfetch-podcasts:/app/podcasts
+      - podfetch-db:/app/db
+    environment:
+      - POLLING_INTERVAL=60
+      - SERVER_URL=http://podcasts/markridgwell.com:80
+      - DATABASE_URL=sqlite:///app/db/podcast.db
+
+volumes:
+  podfetch-podcasts:
+    name: podfetch-podcasts
+    external: true
+  podfetch-db:
+    name: podfetch-db
+    external: true
