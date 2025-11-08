@@ -37,7 +37,7 @@ services:
     restart: always
 
   dnla:
-    image: postgres:14-alpine
+    image: vladgh/minidlna
     container_name: dnla
     hostname: dnla
     volumes:
@@ -45,6 +45,9 @@ services:
     environment:
       - MINIDLNA_MEDIA_DIR=/media \
       - MINIDLNA_FRIENDLY_NAME=Podcasts
+    ports:
+      - "1900:1900/udp"
+      - "8200:8200/tcp"
     networks:
       - host
     restart: always

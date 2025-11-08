@@ -78,3 +78,11 @@ sudo docker compose pull && sudo docker compose up -d --remove-orphans
 sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port protocol="tcp" port="80" accept'
 sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port protocol="tcp" port="80" accept'
 sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="172.16.0.0/20" port protocol="tcp" port="80" accept'
+
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port protocol="udp" port="1900" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port protocol="udp" port="1900" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="172.16.0.0/20" port protocol="udp" port="1900" accept'
+
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port protocol="tcp" port="8200" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port protocol="tcp" port="8200" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="172.16.0.0/20" port protocol="tcp" port="8200" accept'
