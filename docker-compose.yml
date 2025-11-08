@@ -13,13 +13,13 @@ services:
     container_name: podfetch
     user: ${UID:-1000}:${GID:-1000}
     ports:
-      - "80:8000"
+      - "80:8080/tcp"
     volumes:
       - podfetch-podcasts:/app/podcasts
       - podfetch-db:/app/db
     environment:
       - POLLING_INTERVAL=60
-      - SERVER_URL=http://podcasts/markridgwell.com:80
+      - SERVER_URL=http://localhost:8000
       - DATABASE_URL=sqlite:///app/db/podcast.db
 
 volumes:
