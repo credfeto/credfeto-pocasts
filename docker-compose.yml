@@ -13,14 +13,29 @@ services:
     container_name: podfetch
     user: ${UID:-1000}:${GID:-1000}
     ports:
-      - "80:8080/tcp"
+      - "80:80/tcp"
     volumes:
       - podfetch-podcasts:/app/podcasts
       - podfetch-db:/app/db
     environment:
       - POLLING_INTERVAL=60
-      - SERVER_URL=http://localhost:8000
-      - DATABASE_URL=sqlite:///app/db/podcast.db
+      - SERVER_URL=http://localhost:80
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14-alpine
+    container_name: db
+    hostname: db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /data/postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - podfetch-db:/data/postgres
+    restart: unless-stopped
 
 volumes:
   podfetch-podcasts:
