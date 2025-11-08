@@ -11,3 +11,4 @@ BASEDIR="$(dirname "$(readlink -f "$0")")"
 echo "Script Dir: $BASEDIR"
 
 
+sudo docker compose pull && sudo docker compose up -d --remove-orphans

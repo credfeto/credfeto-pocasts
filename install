@@ -10,3 +10,21 @@ die() {
 BASEDIR="$(dirname "$(readlink -f "$0")")"
 echo "Script Dir: $BASEDIR"
 
+
+echo "Create Volumes"
+mkdir -p /data/db
+mkdir -p /data/podcasts
+
+docker volume create \
+  --opt type=none \
+  --opt o=bind \
+  --opt device=/data/db/podfetch \
+  podfetch-db
+
+docker volume create \
+  --opt type=none \
+  --opt o=bind \
+  --opt device=/data/db \
+  podfetch-podcasts
+
+sudo docker compose pull && sudo docker compose up -d --remove-orphans
