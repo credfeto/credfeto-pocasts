@@ -1,2 +1,2 @@
-# credfeto-podfox
-Podfox settings
+# credfeto-podcasts
+podcast settings
