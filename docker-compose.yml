@@ -1,0 +1,66 @@
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 3600
+
+  podfetch:
+    image: samuel19982/podfetch:latest
+    container_name: podfetch
+    restart: always
+    ports:
+      - "80:8000/tcp"
+    volumes:
+      - podfetch_podcasts:/app/podcasts
+    environment:
+      - POLLING_INTERVAL=60
+      - SERVER_URL=http://localhost:8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14-alpine
+    container_name: db
+    hostname: db
+    shm_size: 256mb
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - podfetch_db:/var/lib/postgresql/data
+    restart: always
+
+  dnla:
+    image: vladgh/minidlna
+    container_name: dnla
+    hostname: dnla
+    volumes:
+      - podfetch_podcasts:/media:r
+    environment:
+      - MINIDLNA_MEDIA_DIR=/media
+      - MINIDLNA_FRIENDLY_NAME=Podcasts
+      - FORCE_SCAN=true
+      - FORCE_REBUILD=true
+      - PUID=1
+      - PGID=1
+      - MINIDLNA_INOTIFY:yes
+      - DEBUG:true
+    ports:
+      - "1900:1900/udp"
+      - "8200:8200/tcp"
+    network_mode: host
+    restart: always
+
+volumes:
+  podfetch_podcasts:
+    name: podfetch_podcasts
+    external: true
+  podfetch_db:
+    name: podfetch_db
+    external: true

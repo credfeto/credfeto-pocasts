@@ -10,23 +10,79 @@ die() {
 BASEDIR="$(dirname "$(readlink -f "$0")")"
 echo "Script Dir: $BASEDIR"
 
-echo "Installing config"
-[ -d "/home/markr/Podcasts" ] || ln -s /data/videos/Podcasts /home/markr/Podcasts
-[ -f "/home/markr/.podfox.json" ] || ln -s "$BASEDIR/.podfox.json" /home/markr/.podfox.json
+if [ ! -f "$BASEDIR/.env" ]; then
+  DB_PWD=$(cat /dev/urandom | tr -dc "a-zA-Z0-9" | fold -w 50 | head -n 1)
+  {
+    echo "POSTGRES_USER=podfetch"
+    echo "POSTGRES_PASSWORD=$DB_PWD"
+    echo "POSTGRES_DB=podfetch"
+  } > "$BASEDIR/.env"
+else
+  . "$BASEDIR/.env"
+  export DB_PWD=$POSTGRES_PASSWORD
+
+fi
+
+echo "DB Password: $DB_PWD"
+
+[ -z "$DB_PWD" ] && die "No DB Password"
+
+echo "Create Volumes"
+mkdir -p /data/db/podfetch
+mkdir -p /data/podcasts
+
+docker volume create \
+  --opt type=none \
+  --opt o=bind \
+  --opt device=/data/db/podfetch \
+  podfetch_db
+
+docker volume create \
+  --opt type=none \
+  --opt o=bind \
+  --opt device=/data/podcasts \
+  podfetch_podcasts
 
 
-echo "Installing systemd service"
-sudo cp "$BASEDIR/systemd-unit/credfeto-podfox.service" /etc/systemd/system/credfeto-podfox.service
-sudo cp "$BASEDIR/systemd-unit/credfeto-podfox.timer" /etc/systemd/system/credfeto-podfox.timer
+echo "Start DB"
+docker container stop db
+docker container rm db -f
+docker container run --rm --name db \
+            -v podfetch_db:/var/lib/postgresql/data \
+            -e "POSTGRES_PASSWORD=$DB_PWD" \
+            -d postgres:14-alpine
 
-sudo systemctl daemon-reload
+READY=1
+while [ $READY != 0 ]
+do
+  echo "Waiting for DB"...
+  sleep 5
+  docker exec -it db pg_isready -U postgres
+  READY=$?
+done
 
-sudo systemctl disable --now credfeto-podfox.timer
-sudo systemctl daemon-reload
+#docker exec -it db pg_isready -U postgres
+#echo "Ready: $?"
 
-sudo systemctl enable --now credfeto-podfox.timer
-sudo systemctl list-timers --all
+echo "Start Create DB User"
+docker exec -it db psql -U postgres -c "CREATE USER podfetch WITH PASSWORD '$DB_PWD' CREATEDB;"
+docker exec -it db psql -U postgres -c "CREATE DATABASE podfetch;"
+docker exec -it db psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE podfetch TO podfetch;"
 
-systemctl status credfeto-podfox.timer
+echo "Stop DB"
+docker container stop db
+docker container rm db -f
 
-echo "Done"
+sudo docker compose pull && sudo docker compose up -d --remove-orphans
+
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port protocol="tcp" port="80" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port protocol="tcp" port="80" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="172.16.0.0/20" port protocol="tcp" port="80" accept'
+
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port protocol="udp" port="1900" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port protocol="udp" port="1900" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="172.16.0.0/20" port protocol="udp" port="1900" accept'
+
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port protocol="tcp" port="8200" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port protocol="tcp" port="8200" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="172.16.0.0/20" port protocol="tcp" port="8200" accept'
